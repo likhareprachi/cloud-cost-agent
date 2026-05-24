@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Cost Optimization AI Agent Dashboard</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="radial-glow"></div>
+
+<div class="app">
+    <!-- Header -->
+    <header class="header window-header">
+        <!-- Mac-style Window Controls -->
+        <div class="window-controls">
+            <span class="win-dot close"></span>
+            <span class="win-dot minimize"></span>
+            <span class="win-dot maximize"></span>
+        </div>
+        
+        <div class="header-left">
+            <div class="logo-area">
+                <div class="cloud-logo-container">
+                    <span class="cloud-icon">☁️</span>
+                </div>
+                <div>
+                    <h1 class="logo-text">Cloud Cost <span class="text-mint">Agent</span></h1>
+                    <span class="subtitle">Autonomous Cost Audits powered by Groq Llama 3 & Firebase</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div id="connection-status" class="status-indicator-badge state-demo">
+                <span class="pulse-dot"></span>
+                <span class="status-text">Demo Sandbox</span>
+            </div>
+            <button class="run-btn" id="run-agent-btn">
+                <span class="btn-icon">⚡</span> Run Agent Now
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Info Alert / Firebase Setup Notice -->
+    <div id="firebase-alert" class="info-alert" style="display: none;">
+        <div class="alert-icon">ℹ️</div>
+        <div class="alert-content">
+            <strong>Running in Demo Sandbox Mode.</strong> Connect Firestore in <code>index.html</code> to enable real-time synchronization with your Python backend agent!
+            <button class="close-alert-btn" onclick="document.getElementById('firebase-alert').style.display='none'">×</button>
+        </div>
+    </div>
+
+    <!-- Active Loading / Scanning State -->
+    <div id="loading" class="loading-box" style="display:none">
+        <div class="scanner-container">
+            <div class="spinner"></div>
+            <div class="scanner-laser"></div>
+        </div>
+        <div class="loading-text">
+            <h3>Analyzing Cloud Infrastructure...</h3>
+            <p id="loading-sub">Groq AI is calculating potential waste and resizing suggestions</p>
+        </div>
+    </div>
+
+    <!-- Two-Column Workspace Wrapper -->
+    <div class="dashboard-workspace">
+        
+        <!-- Left Column: Primary Metrics, Charts & Checklist (~70%) -->
+        <div class="main-content-flow">
+            
+            <!-- Control Bar Options -->
+            <div class="control-bar card">
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-env="all">🌐 All Environments</button>
+                    <button class="tab-btn" data-env="production">🛡️ Production</button>
+                    <button class="tab-btn" data-env="staging">🧪 Staging</button>
+                    <button class="tab-btn" data-env="development">💻 Development</button>
+                </div>
+                <div class="options-actions">
+                    <button class="action-outline-btn" id="export-json-btn">📤 Export JSON Report</button>
+                </div>
+            </div>
+            
+            <!-- Stats KPI Row -->
+            <section class="stats-row">
+                <div class="stat-card card-green">
+                    <div class="stat-glow"></div>
+                    <div class="stat-header">
+                        <span class="stat-label">Monthly Savings</span>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="stat-value" id="total-savings">--</div>
+                    <div class="stat-footer">Potential recovery</div>
+                </div>
+                
+                <div class="stat-card card-red">
+                    <div class="stat-glow"></div>
+                    <div class="stat-header">
+                        <span class="stat-label">Current Spend</span>
+                        <span class="stat-icon">📊</span>
+                    </div>
+                    <div class="stat-value" id="current-spend">--</div>
+                    <div class="stat-footer">AWS May Billing</div>
+                </div>
+                
+                <div class="stat-card card-orange">
+                    <div class="stat-glow"></div>
+                    <div class="stat-header">
+                        <span class="stat-label">Predicted Spend</span>
+                        <span class="stat-icon">📈</span>
+                    </div>
+                    <div class="stat-value" id="predicted-spend">--</div>
+                    <div class="stat-footer">Next billing cycle</div>
+                </div>
+                
+                <div class="stat-card card-purple">
+                    <div class="stat-glow"></div>
+                    <div class="stat-header">
+                        <span class="stat-label">Waste Percentage</span>
+                        <span class="stat-icon">⚠️</span>
+                    </div>
+                    <div class="stat-value" id="waste-pct">--</div>
+                    <div class="stat-footer">Efficiency rating</div>
+                </div>
+            </section>
+
+            <!-- Spending Breakdown & AI Summary row -->
+            <div class="visuals-row">
+                <!-- Dynamic Visualization Area -->
+                <section class="card viz-card">
+                    <div class="viz-header">
+                        <h2>📊 Spending Distribution</h2>
+                        <p class="section-desc">Comparing resource costs & potential optimizations</p>
+                    </div>
+                    <div class="viz-content">
+                        <!-- SVG Donut Chart -->
+                        <div class="chart-container">
+                            <svg id="donut-chart" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1e293b" stroke-width="8"/>
+                            </svg>
+                            <div class="chart-center">
+                                <span id="chart-center-val">--</span>
+                                <span class="chart-center-lbl">Total Spend</span>
+                            </div>
+                        </div>
+                        <!-- Chart Legend -->
+                        <div class="chart-legend" id="chart-legend-list">
+                            <div class="empty-state">Run the cost agent to populate charts</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary & Insights -->
+                <section class="card summary-card">
+                    <div class="card-header-flex">
+                        <h2>🤖 Groq AI Cost Assessment</h2>
+                        <span id="severity-badge" class="badge">No Scan</span>
+                    </div>
+                    <p id="ai-summary" class="summary-text">Connect Firebase or trigger the interactive demo simulation above to view the cost audit analysis and immediate recommendations.</p>
+                    
+                    <!-- Custom Sparkline Trend Visualization -->
+                    <div class="trend-box">
+                        <span class="trend-title">Estimated Optimization Runway</span>
+                        <div class="sparkline-wrapper">
+                            <svg id="trend-sparkline" viewBox="0 0 300 60" preserveAspectRatio="none">
+                                <!-- Plotted dynamically -->
+                            </svg>
+                        </div>
+                        <div class="trend-labels">
+                            <span>Current Spend</span>
+                            <span id="savings-delta">-0%</span>
+                            <span>Optimized Spend</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Immediate Actions Checklist -->
+            <section class="card list-wrapper-card">
+                <h2>🔴 Immediate Waste Mitigation (Safe to Terminate)</h2>
+                <p class="section-desc">Unused resources identified by Groq AI as safe to delete immediately to slash monthly spend.</p>
+                <div id="immediate-actions" class="items-list">
+                    <div class="empty-state">
+                        <span class="empty-icon">🏖️</span>
+                        <p>No optimization report loaded. Click "Run Agent Now" to scan resources.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Resizing Widget -->
+            <section class="card list-wrapper-card">
+                <h2>🔧 Database Downsizing Recommendations</h2>
+                <p class="section-desc">Oversized database instances that can be scaled down with zero impact on traffic.</p>
+                <div id="resize-list" class="items-list">
+                    <div class="empty-state">
+                        <span class="empty-icon">⚡</span>
+                        <p>No oversized datastores detected. Run scan to evaluate databases.</p>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+        
+        <!-- Right Column: Sidebar (CoPilot Chat & Anomalies) (~30%) -->
+        <aside class="sidebar-flow">
+            
+            <!-- Groq Cost CoPilot AI Assistant -->
+            <section class="card copilot-card">
+                <div class="copilot-layout">
+                    <div class="copilot-chat-area">
+                        <div class="chat-header-area">
+                            <h2>💬 Groq Cost CoPilot</h2>
+                            <span class="copilot-status"><span class="pulse-dot-green"></span> Llama 3 Active</span>
+                        </div>
+                        <div class="chat-messages" id="copilot-chat-messages">
+                            <div class="chat-bubble bot-message">
+                                <strong>CoPilot:</strong> Hello! I am your AI Cloud Optimization assistant. Ask me anything about your current billing, idle EC2 servers, oversized databases, or network anomalies, and I will extract the details for you.
+                            </div>
+                        </div>
+                        <div class="chat-input-wrapper">
+                            <input type="text" id="copilot-input" placeholder="Type a message or click a suggestion below..." autocomplete="off">
+                            <button class="send-btn" id="copilot-send-btn">Send ➔</button>
+                        </div>
+                    </div>
+                    <div class="copilot-sidebar">
+                        <h3>💡 Quick Queries</h3>
+                        <div class="quick-chips">
+                            <button class="quick-chip-btn" data-query="Which instance is wasting the most money?">💰 Biggest waste?</button>
+                            <button class="quick-chip-btn" data-query="Why did S3 spike this month?">📡 Explain S3 spike</button>
+                            <button class="quick-chip-btn" data-query="What is the recommended size for production MySQL?">🔧 RDS resize suggestion</button>
+                            <button class="quick-chip-btn" data-query="How much can we save in Staging?">🧪 Staging savings</button>
+                        </div>
+                        <div class="copilot-stats-mini">
+                            <span class="mini-title">Active Environment Scope</span>
+                            <div class="scope-pill" id="current-scope-pill">All Environments</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cost Anomalies Detected -->
+            <section class="card anomalies-card">
+                <h2>📡 Network & Billing Anomalies</h2>
+                <p class="section-desc">Unusual month-over-month increases flagged for inspection.</p>
+                <div id="anomalies-list" class="items-list">
+                    <div class="empty-state">
+                        <span class="empty-icon">🔍</span>
+                        <p>No active anomalies flagged. Everything looks operational.</p>
+                    </div>
+                </div>
+            </section>
+            
+        </aside>
+        
+    </div>
+
+    <!-- Beautiful Detailed Platform Guide Panel -->
+    <section class="card full-width guide-section-card" style="margin-top: 24px;">
+        <div class="guide-header">
+            <h2>📖 How to Operate the Cloud Cost Agent Platform</h2>
+            <p class="section-desc">A detailed guide on utilizing autonomous cost audits, interactive filters, and the Llama 3 Cost CoPilot.</p>
+        </div>
+        <div class="guide-grid">
+            <div class="guide-step-card">
+                <div class="step-num">01</div>
+                <h4>Trigger Billing Scans</h4>
+                <p>Click the glowing <strong>"Run Agent Now"</strong> button in the header to animate a simulated scan, or execute <code>python backend/agent.py</code> in your VS Code terminal to fetch live AWS configurations and compile Llama 3 audits to Firestore.</p>
+            </div>
+            <div class="guide-step-card">
+                <div class="step-num">02</div>
+                <h4>Apply Decommission Actions</h4>
+                <p>Review waste findings in the <strong>Immediate Waste Mitigation</strong> checklist. Toggle checkboxes next to items to resolve them. Your active spend metrics, waste percentages, and SVG distribution charts will recalculate instantly.</p>
+            </div>
+            <div class="guide-step-card">
+                <div class="step-num">03</div>
+                <h4>Consult Llama 3 CoPilot</h4>
+                <p>Ask the sidebar <strong>Groq Cost CoPilot</strong> chat assistant detailed questions. Type custom prompts like <em>"Explain S3 spike"</em> or click the suggestion chips to receive database downsizing and staging server remediation timelines.</p>
+            </div>
+        </div>
+        <div class="guide-footer-meta">
+            <div class="meta-item">🎛️ <strong>Environment Scope:</strong> Use the top tabs to isolate Production, Staging, or Development assets dynamically.</div>
+            <div class="meta-item">📤 <strong>Export Reports:</strong> Click "Export JSON Report" to download offline ledger profiles of your active environment configuration.</div>
+        </div>
+    </section>
+
+    <!-- Sleek Minimal Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <span>📡 Last Updated: <strong id="last-updated">Never</strong></span>
+            <span>⚡ Groq Llama 3 Console • v1.3</span>
+        </div>
+    </footer>
+</div>
+
+<!-- Firebase SDK & Application Logic Module -->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
